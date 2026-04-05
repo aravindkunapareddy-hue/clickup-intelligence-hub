@@ -1,7 +1,9 @@
-export function TagPill({ children }) {
-  return <span className="tag-pill">{children}</span>
-}
+import React from 'react';
 
-export function TagPillGray({ children }) {
-  return <span className="tag-pill-gray">{children}</span>
+export default function TagPill({ children }) {
+  return (
+    <span className="tag-pill">
+      {children}
+    </span>
+  );
 }

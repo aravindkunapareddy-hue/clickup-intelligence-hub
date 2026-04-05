@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function EmptyState({ icon = '📝', title, desc }) {
   return (
     <div className="empty-state">

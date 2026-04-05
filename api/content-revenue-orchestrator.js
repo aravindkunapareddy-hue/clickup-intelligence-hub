@@ -1,10 +1,9 @@
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
-const ANTHROPIC_VERSION = '2023-06-01';
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
-const TOOL_SCHEMA = {
+const GEMINI_FUNCTION = {
   name: 'emit_strategy',
   description: 'Return a content revenue strategy with scoring, next best action, experiments, handoff, and analytics.',
-  input_schema: {
+  parameters: {
     type: 'object',
     additionalProperties: false,
     properties: {
@@ -507,59 +506,48 @@ function validatePayload(payload) {
   return '';
 }
 
-async function callAnthropic(payload) {
-  const system = [
+async function callGemini(payload) {
+  const systemInstruction = [
     'You are a senior growth marketing manager building a ClickUp content revenue operating system.',
     'Your job is to score the asset, choose the single next best action, design experiments, propose cross-pod execution, and define a defensible attribution framework.',
     'Be concrete, operator-like, and practical. Do not write fluff. Use the input metrics if present. Be skeptical of generic CTA advice. Optimize for lead quality, pipeline influence, and funnel velocity, not only traffic.',
     'Assume the pods are SEO/Blog, YouTube, Customer Marketing, and Demand.',
-    'Return the full response by calling the emit_strategy tool exactly once.'
+    'Return the full response by calling the emit_strategy function exactly once.'
   ].join(' ');
 
-  const userPrompt = JSON.stringify(payload, null, 2);
+  const userPrompt = `Generate a structured content revenue strategy for this intake:\n${JSON.stringify(payload, null, 2)}`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-version': ANTHROPIC_VERSION,
-      'x-api-key': process.env.ANTHROPIC_API_KEY
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: DEFAULT_MODEL,
-      max_tokens: 3000,
-      temperature: 0.3,
-      system,
-      tools: [TOOL_SCHEMA],
-      tool_choice: {
-        type: 'tool',
-        name: TOOL_SCHEMA.name,
-        disable_parallel_tool_use: true
-      },
-      messages: [
-        {
-          role: 'user',
-          content: `Generate a structured content revenue strategy for this intake:\n${userPrompt}`
-        }
-      ]
+      system_instruction: { parts: [{ text: systemInstruction }] },
+      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+      tools: [{ functionDeclarations: [GEMINI_FUNCTION] }],
+      tool_config: { function_calling_config: { mode: 'ANY', allowed_function_names: ['emit_strategy'] } },
+      generationConfig: { temperature: 0.3 }
     })
   });
 
   const json = await response.json();
   if (!response.ok) {
-    const message = json && json.error && json.error.message ? json.error.message : 'Anthropic API request failed.';
+    const message = json && json.error && json.error.message ? json.error.message : 'Gemini API request failed.';
     throw new Error(message);
   }
 
-  const toolUse = Array.isArray(json.content)
-    ? json.content.find((block) => block.type === 'tool_use' && block.name === TOOL_SCHEMA.name)
+  const candidate = json.candidates && json.candidates[0];
+  const parts = candidate && candidate.content && candidate.content.parts;
+  const funcCall = Array.isArray(parts)
+    ? parts.find((p) => p.functionCall && p.functionCall.name === 'emit_strategy')
     : null;
 
-  if (!toolUse || !toolUse.input) {
-    throw new Error('Anthropic did not return the structured tool payload.');
+  if (!funcCall || !funcCall.functionCall || !funcCall.functionCall.args) {
+    throw new Error('Gemini did not return the structured function call payload.');
   }
 
-  return toolUse.input;
+  return funcCall.functionCall.args;
 }
 
 function sendJson(res, statusCode, body) {
@@ -574,7 +562,7 @@ module.exports = async function handler(req, res) {
   if (method === 'GET') {
     return sendJson(res, 200, {
       ok: true,
-      demo: !process.env.ANTHROPIC_API_KEY,
+      demo: !process.env.GEMINI_API_KEY,
       model: DEFAULT_MODEL
     });
   }
@@ -591,7 +579,7 @@ module.exports = async function handler(req, res) {
       return sendJson(res, 400, { ok: false, error: validationError });
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return sendJson(res, 200, {
         ok: true,
         demo: true,
@@ -599,7 +587,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const result = await callAnthropic(payload);
+    const result = await callGemini(payload);
     return sendJson(res, 200, {
       ok: true,
       demo: false,

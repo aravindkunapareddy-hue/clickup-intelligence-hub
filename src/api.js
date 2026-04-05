@@ -1,4 +1,16 @@
-const SYSTEM_PROMPT = `You are ClickUp's Senior Content Strategist with deep expertise in PLG content marketing, SEO, GEO/AI search, demand generation, and content operations. ClickUp has 22M+ MAU, $300M ARR, publishes 200+ content pieces monthly across 4 pods (SEO/Blog, YouTube, Customer Marketing, Demand). The #1 growth lever is converting content readers into free trial signups. Respond ONLY with valid JSON — no markdown, no preamble, no explanation.`
+const SYSTEM_PROMPT = `You are ClickUp's Principal Content Architect. Your mandate is to build enterprise-grade PLG content systems that convert high-intent readers into free trial signups and pipeline.
+
+CORE PRODUCT PHILOSOPHY TO INJECT:
+- ClickUp is "One app to replace them all". It eliminates horizontal tool sprawl (Jira + Asana + Monday + Notion + Slack).
+- Focus heavily on structural superiority: ClickUp Brain (AI), Custom Fields, Dashboards, and Hierarchy.
+
+ANTI-GENERIC RULES (CRITICAL):
+- NEVER output generic advice like "use strong headers", "write high quality content", or "include images".
+- EVERY angle, hook, and tactic must be deeply opinionated, specific, and actionable. 
+- Name specific ClickUp features to combat competitor weaknesses.
+- If the Context mentions "Content Gap" or "High Bounce", the strategy MUST explicitly solve that exact metric issue directly.
+
+Respond ONLY with valid JSON — no markdown block formatting, no preamble, no explanation. Just the raw JSON object.`
 
 function buildUserMessage(inputs) {
   return `Keyword: ${inputs.keyword}
@@ -9,7 +21,10 @@ Funnel stage: ${inputs.funnel}
 Word count: ${inputs.wordCount}
 Urgency: ${inputs.urgency}
 Pod: ${inputs.pod}
-Context: ${inputs.context || 'None'}
+Context & Routing Instruction: ${inputs.context || 'None'}
+
+### DIRECTIVE: 
+The content you are outlining needs to be a world-class strategic execution. Focus on how the content explicitly closes the loops mentioned in the Context. If it is a competitive comparison, be aggressive and factual. If it is a gap, fill it fundamentally. 
 
 Generate the complete content brief JSON using this exact schema:
 {
@@ -17,17 +32,17 @@ Generate the complete content brief JSON using this exact schema:
     "intent": "Informational|Commercial|Transactional|Navigational",
     "intent_rationale": "string",
     "primary_pain": "string",
-    "recommended_angle": "string (2-3 sentences specific and opinionated)",
-    "unique_hook": "string (unmissable opening line)",
-    "content_format": "string",
+    "recommended_angle": "string (2-3 sentences specific and highly opinionated combatting competitors or filling the specific gap, no fluff)",
+    "unique_hook": "string (an unmissable opening sentence that agitates the primary pain)",
+    "content_format": "string (e.g. 'Interactive Feature Matrix', 'Deep-dive Use Case')",
     "word_count_recommendation": "string",
     "secondary_keywords": ["5 strings"],
     "semantic_entities": ["3 strings"]
   },
   "research": {
     "serp_landscape": "string",
-    "content_gap": "string",
-    "competitor_weaknesses": ["3 strings"],
+    "content_gap": "string (What exactly are competitors missing that we have? e.g. 'Asana lacks native document management')",
+    "competitor_weaknesses": ["3 strings (e.g., 'Jira requires plugins for simple gantt charts')"],
     "our_unfair_advantage": "string",
     "diviculty_assessment": "Low|Medium|High",
     "estimated_months_to_rank": "string",
@@ -41,9 +56,9 @@ Generate the complete content brief JSON using this exact schema:
   "distribution": {
     "cta_type": "Free Trial|Template Download|Webinar|Demo|Feature Spotlight",
     "cta_placement": "string",
-    "cta_headline": "string",
-    "cta_body_copy": "string",
-    "cta_button_text": "string",
+    "cta_headline": "string (e.g. 'Stop paying for 4 tools. Try ClickUp free.')",
+    "cta_body_copy": "string (Highly specific to the persona and keyword)",
+    "cta_button_text": "string (Action-oriented, max 4 words)",
     "repurposing_plays": [
       {"format": "string", "platform": "string", "angle": "string"},
       {"format": "string", "platform": "string", "angle": "string"},
@@ -97,8 +112,8 @@ Generate the complete content brief JSON using this exact schema:
     "image_alt_texts": ["string", "string", "string"]
   },
   "geo": {
-    "primary_question": "string (exact Perplexity user query)",
-    "structured_answer": "string (2-3 sentences for AI citation)",
+    "primary_question": "string (exact Perplexity/SearchGPT user query)",
+    "structured_answer": "string (2-3 sentences strictly optimized for AI citation engine scraping. Use bullet points/direct answers.)",
     "secondary_questions": ["string", "string"],
     "entities_to_mention": ["string", "string", "string", "string"],
     "schema_markup_type": "string",
@@ -131,7 +146,7 @@ export async function generateBrief(inputs, apiKey) {
       "serp_features_to_target": ["Featured Snippet", "People Also Ask"],
       "competitor_examples": [
         {"name": "Asana Blog", "content_type": "Listicle", "weakness": "Free plan is very limited"},
-        {"name": "Monday.com", "content_type": "Guide", "weakness": "Sales-heavy approach"}
+        {"name": "Monday.com", "content_type": "Guide", "weakness": "Product-heavy approach"}
       ]
     },
     "distribution": {
@@ -245,6 +260,96 @@ export async function generateBrief(inputs, apiKey) {
   } catch (err) {
     console.warn("API Failed or Timed Out:", err.message)
     console.warn("Falling back to DEMO mode since API failed.")
+    await new Promise(r => setTimeout(r, 1500))
+    return generateMock()
+  }
+}
+
+const LEAD_SCORER_SYSTEM_PROMPT = `You are a Principal Content Strategy AI. Your job is to analyze B2B SaaS content consumption patterns and output a persona fit score from 0-100, intent analysis, and recommended next steps for the content team. Respond ONLY with valid JSON — no markdown, no preamble.`
+
+function buildLeadMessage(inputs) {
+  return `Contact Name: ${inputs.name}
+Seniority: ${inputs.seniority}
+Recency: ${inputs.recency}
+Topic Cluster: ${inputs.topicCluster}
+Active Signals Detected: ${inputs.activeSignals.join(', ')}
+
+Analyze these signals and output JSON matching this exact schema:
+{
+  "score": 85,
+  "intentTier": "Hot", // Hot (>74), Warm (40-74), Cold (<40)
+  "intentAnalysis": "string (2-3 sentences explaining exactly why this score was given based on their specific content journey)",
+  "contentRecommendation": {
+    "summary": "string (What the content team should do next)",
+    "steps": ["step 1", "step 2", "step 3"]
+  },
+  "attributionStory": "string (A narrative of how their content consumption moved them toward buying intent)",
+  "contentGap": "string (Identify what content should be created next to capture more of this intent)",
+  "distributionRecommendation": "string (How the content team should distribute or update content next)",
+  "signalBreakdown": [
+    { "signal": "string (the exact signal name passed)", "insight": "string (Why this signal matters for this prospect)" }
+  ]
+}`
+}
+
+export async function scoreLead(inputs, apiKey) {
+  const generateMock = () => {
+    const isHot = inputs.activeSignals.length > 3 || inputs.activeSignals.includes('Pricing Page View');
+    
+    return {
+      score: isHot ? 92 : 65,
+      intentTier: isHot ? "Hot" : "Warm",
+      intentAnalysis: "This persona is showing high intent by combining educational content with late-stage comparison and template usage. Their most recent interaction was within 24 hours, indicating active evaluation.",
+      contentRecommendation: {
+        summary: "Pair comparison content with a workflow template and a short product walkthrough.",
+        steps: [
+          "Publish a comparison update with a template CTA.",
+          "Add a 3-minute walkthrough video to the top blog.",
+          "Ship a follow-up blog that answers top objections."
+        ]
+      },
+      attributionStory: "Journey began with high-level blog posts about project management, then escalated when they viewed comparison content and downloaded a workflow template.",
+      contentGap: "Add a BOFU proof page that compares migration effort across competitors for this persona.",
+      distributionRecommendation: "Refresh the comparison post, update internal links, and promote via newsletter and YouTube.",
+      signalBreakdown: inputs.activeSignals.map(sig => ({
+        signal: sig,
+        insight: "Strong indicator of active content interest."
+      }))
+    };
+  };
+
+  if (apiKey.toLowerCase().includes('demo') || apiKey.toLowerCase().includes('mock')) {
+    await new Promise(r => setTimeout(r, 1500))
+    return generateMock()
+  }
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: LEAD_SCORER_SYSTEM_PROMPT }] },
+        contents: [{ role: "user", parts: [{ text: buildLeadMessage(inputs) }] }],
+        generationConfig: { responseMimeType: "application/json" }
+      }),
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      throw new Error('API Error')
+    }
+
+    const data = await response.json()
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
+    return JSON.parse(cleaned)
+  } catch (err) {
+    console.warn("API Failed or Timed Out. Falling back to DEMO mode.")
     await new Promise(r => setTimeout(r, 1500))
     return generateMock()
   }

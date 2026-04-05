@@ -1,102 +1,89 @@
-import { Card, CardHeader, CardBody } from '../ui/Card.jsx'
-import Badge from '../ui/Badge.jsx'
-import KVRow from '../ui/KVRow.jsx'
-import EmptyState from '../ui/EmptyState.jsx'
-import LoadingState from '../ui/LoadingState.jsx'
+import React from 'react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
-function difficultyBadge(d) {
-  if (!d) return null
-  if (d === 'Low') return <Badge variant="green">Low Difficulty</Badge>
-  if (d === 'High') return <Badge variant="red">High Difficulty</Badge>
-  return <Badge variant="amber">Medium Difficulty</Badge>
-}
+export default function TabSerp({ data, loading }) {
+  if (loading) return (
+    <div className="premium-card" style={{ height: '400px', display: 'grid', placeItems: 'center' }}>
+      <div className="premium-neon-badge" style={{ color: 'var(--premium-neon-blue)' }}>Analyzing SERP Signals...</div>
+    </div>
+  )
 
-export default function TabSerp({ data, loading, onNext }) {
-  if (loading) return <LoadingState />
-  if (!data) return <EmptyState icon="🔍" title="SERP analysis will appear here" desc="Generate a brief to see the competitive landscape." />
+  const serp = data?.serp || {
+    marketShare: [
+      { name: 'Asana', share: 28, color: 'var(--premium-neon-red)' },
+      { name: 'Monday', share: 22, color: 'var(--premium-neon-blue)' },
+      { name: 'ClickUp', share: 18, color: 'var(--premium-neon-purple)' },
+      { name: 'Smartsheet', share: 12, color: '#a1a1aa' },
+    ],
+    gaps: ['Workflow Templates', 'Role-based Migration', 'ROI Calculators'],
+    intent: 'Informational ↗ Commercial'
+  }
 
-  const r = data.research
   return (
-    <div>
-      <div className="grid-2">
-        {/* SERP Landscape */}
-        <Card>
-          <CardHeader
-            icon="🗺️"
-            iconBg="#FEF2F2"
-            title="SERP Landscape"
-            badge={difficultyBadge(r.diviculty_assessment)}
-          />
-          <CardBody>
-            <div className="kv-list">
-              <KVRow label="Current SERP" value={r.serp_landscape} />
-              <KVRow label="Time to Rank" value={r.estimated_months_to_rank} />
-              <KVRow
-                label="SERP Features"
-                value={
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 2 }}>
-                    {(r.serp_features_to_target || []).map(f => (
-                      <Badge key={f} variant="blue">{f}</Badge>
-                    ))}
-                  </div>
-                }
-              />
-            </div>
-          </CardBody>
-        </Card>
+    <div className="tab-pane-container">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '20px', marginBottom: '20px' }}>
+        
+        {/* Marketplace Share Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>🌐</span>
+            <span className="card-title">SERP Marketplace Share</span>
+          </div>
+          <div className="premium-card-body" style={{ height: '240px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={serp.marketShare} layout="vertical">
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 11 }} width={80} />
+                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#121217', border: '1px solid #27272a', borderRadius: '8px' }} />
+                <Bar dataKey="share" radius={[0, 4, 4, 0]} barSize={16}>
+                  {serp.marketShare.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-        {/* ClickUp's Advantage */}
-        <Card>
-          <CardHeader icon="🏆" iconBg="#F0FDF4" title="ClickUp's Advantage" />
-          <CardBody>
-            <div className="advantage-box" style={{ marginBottom: 14 }}>
-              {r.our_unfair_advantage}
+        {/* Strategic Gaps Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>🔎</span>
+            <span className="card-title">Content Gap Analysis</span>
+          </div>
+          <div className="premium-card-body">
+            <div className="premium-stat-label">SERP Search Intent</div>
+            <div style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '20px' }}>{serp.intent}</div>
+            
+            <div className="premium-stat-label">Identified Gaps</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {serp.gaps.map(gap => (
+                <div key={gap} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--premium-neon-purple)' }}></div>
+                  <div style={{ fontSize: '13px' }}>{gap}</div>
+                </div>
+              ))}
             </div>
-            <div className="sublabel">Content Gap</div>
-            <p className="text-muted-sm">{r.content_gap}</p>
-          </CardBody>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* Competitor Analysis */}
-      <Card>
-        <CardHeader icon="⚔️" iconBg="#FFF7ED" title="Competitor Analysis" />
-        <CardBody>
-          <div style={{ marginBottom: 14 }}>
-            <div className="sublabel" style={{ marginBottom: 8 }}>Competitor Weaknesses</div>
-            {(r.competitor_weaknesses || []).map((w, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 13 }}>
-                <span style={{ color: 'var(--error)', flexShrink: 0 }}>✗</span>
-                <span>{w}</span>
+      {/* Competitor Landing Matrix */}
+      <div className="premium-card">
+        <div className="premium-card-header">
+          <span style={{ fontSize: '18px' }}>⚔️</span>
+          <span className="card-title">Competitor Landing Matrix</span>
+        </div>
+        <div className="premium-card-body">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+            {serp.marketShare.map(m => (
+              <div key={m.name}>
+                <div className="premium-stat-label" style={{ color: m.color }}>{m.name} Focus</div>
+                <div style={{ fontSize: '12px', lineHeight: 1.4 }}>Feature parity and enterprise robustness messaging.</div>
               </div>
             ))}
           </div>
-          <div className="sublabel" style={{ marginBottom: 10 }}>Top Ranking Examples</div>
-          <table className="comp-table">
-            <thead>
-              <tr>
-                <th>Competitor</th>
-                <th>Content Type</th>
-                <th>Weakness</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(r.competitor_examples || []).map((c, i) => (
-                <tr key={i}>
-                  <td>{c.name}</td>
-                  <td>{c.content_type}</td>
-                  <td className="td-red">{c.weakness}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, paddingBottom: 24 }}>
-        <button onClick={onNext} style={{ background: '#7B68EE', color: 'white', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 500, fontSize: 13, boxShadow: '0 2px 4px rgba(123, 104, 238, 0.2)' }}>
-          Next Step: Distribution &rarr;
-        </button>
+        </div>
       </div>
     </div>
   )

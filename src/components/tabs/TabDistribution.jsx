@@ -1,92 +1,90 @@
-import { Card, CardHeader, CardBody } from '../ui/Card.jsx'
-import Badge from '../ui/Badge.jsx'
-import KVRow from '../ui/KVRow.jsx'
-import EmptyState from '../ui/EmptyState.jsx'
-import LoadingState from '../ui/LoadingState.jsx'
+import React from 'react'
 
-export default function TabDistribution({ data, loading, onNext }) {
-  if (loading) return <LoadingState />
-  if (!data) return <EmptyState icon="📣" title="Distribution plan will appear here" desc="Generate a brief to see CTA strategy, repurposing plays, and internal links." />
+export default function TabDistribution({ data, loading }) {
+  if (loading) return (
+    <div className="premium-card" style={{ height: '400px', display: 'grid', placeItems: 'center' }}>
+      <div className="premium-neon-badge" style={{ color: 'var(--premium-neon-green)' }}>Optimizing Distribution Routes...</div>
+    </div>
+  )
 
-  const d = data.distribution
+  const distribution = data?.distribution || {
+    priority: 'High Intensity',
+    channels: [
+      { name: 'Organic Search', focus: 'Keyword Capture', reach: '80%' },
+      { name: 'LinkedIn Ads', focus: 'Retargeting Pricing Visitors', reach: '95%' },
+      { name: 'Email Lifecycle', focus: 'Nurture Sequence', reach: '100%' },
+      { name: 'Communities', focus: 'Subreddit/Slack Mentions', reach: '40%' },
+    ]
+  }
+
   return (
-    <div>
-      <div className="grid-2">
-        {/* CTA Strategy */}
-        <Card>
-          <CardHeader
-            icon="🎯"
-            iconBg="#FFF7ED"
-            title="CTA Strategy"
-            badge={<Badge variant="green">{d.cta_type}</Badge>}
-          />
-          <CardBody>
-            <div className="kv-list" style={{ marginBottom: 14 }}>
-              <KVRow label="Placement" value={d.cta_placement} />
+    <div className="tab-pane-container">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '20px', marginBottom: '20px' }}>
+        
+        {/* Distribution Intensity Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>📣</span>
+            <span className="card-title">Distribution Intensity</span>
+          </div>
+          <div className="premium-card-body">
+            <div className="premium-stat-label">Strategy Mode</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--premium-neon-purple)', marginBottom: '20px' }}>{distribution.priority}</div>
+            
+            <div style={{ background: 'rgba(0, 210, 255, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0, 210, 255, 0.2)' }}>
+              <div style={{ fontSize: '13px', lineHeight: 1.6 }}>Deploying a three-touch sequence built around migration proof, setup speed, and team rollout templates.</div>
             </div>
-            <div className="cta-preview-box">
-              <div className="cta-preview-headline">{d.cta_headline}</div>
-              <div className="cta-preview-body">{d.cta_body_copy}</div>
-              <span className="cta-preview-btn">{d.cta_button_text}</span>
-            </div>
-          </CardBody>
-        </Card>
+          </div>
+        </div>
 
-        {/* Social & Newsletter */}
-        <Card>
-          <CardHeader icon="📱" iconBg="#F0FDF4" title="Social & Newsletter" />
-          <CardBody>
-            <div className="sublabel">LinkedIn Hook</div>
-            <div className="linkedin-box" style={{ marginBottom: 12 }}>{d.linkedin_hook}</div>
-            <div className="sublabel">Newsletter Angle</div>
-            <p className="text-muted-sm" style={{ marginBottom: 10 }}>{d.newsletter_angle}</p>
-            <div className="sublabel">YouTube Companion</div>
-            <p className="text-muted-sm">{d.youtube_companion_angle}</p>
-          </CardBody>
-        </Card>
-      </div>
-
-      <div className="grid-2">
-        {/* Repurposing Plays */}
-        <Card>
-          <CardHeader icon="♻️" iconBg="#FAF5FF" title="Repurposing Plays" />
-          <CardBody>
-            {(d.repurposing_plays || []).map((p, i) => (
-              <div key={i} className="play-item">
-                <Badge variant="cu" style={{ flexShrink: 0 }}>{p.platform}</Badge>
-                <div className="play-content">
-                  <div className="play-format">{p.format}</div>
-                  <div className="play-angle">{p.angle}</div>
-                </div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
-
-        {/* Internal Links */}
-        <Card>
-          <CardHeader icon="🔗" iconBg={undefined} title="Internal Links" />
-          <CardBody>
-            {(d.internal_links || []).map((link, i) => (
-              <div key={i} className="task-item">
-                <div className="task-num">{i + 1}</div>
-                <div className="task-content">
-                  <div className="task-name">{link.title}</div>
-                  <div className="task-meta">
-                    <span style={{ fontSize: 11, color: 'var(--dark-purple)', fontStyle: 'italic' }}>Anchor: &ldquo;{link.anchor_text}&rdquo;</span>
+        {/* Channel Matrix Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>🌐</span>
+            <span className="card-title">Channel Strategic Matrix</span>
+          </div>
+          <div className="premium-card-body">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              {distribution.channels.map(ch => (
+                <div key={ch.name} style={{ background: 'var(--premium-dark-surface)', padding: '16px', borderRadius: '12px', border: '1px solid var(--premium-dark-border)' }}>
+                  <div className="premium-stat-label" style={{ marginBottom: '4px' }}>{ch.name}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>{ch.focus}</div>
+                  <div style={{ marginTop: '8px', height: '4px', background: 'var(--premium-dark-elevated)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: ch.reach, height: '100%', background: 'var(--premium-neon-blue)' }}></div>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{link.rationale}</div>
                 </div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, paddingBottom: 24 }}>
-        <button onClick={onNext} style={{ background: '#7B68EE', color: 'white', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 500, fontSize: 13, boxShadow: '0 2px 4px rgba(123, 104, 238, 0.2)' }}>
-          Next Step: Calendar &rarr;
-        </button>
+      {/* Paid / Organic Split Card */}
+      <div className="premium-card">
+        <div className="premium-card-header">
+          <span style={{ fontSize: '18px' }}>📈</span>
+          <span className="card-title">Strategic Allocation</span>
+        </div>
+        <div className="premium-card-body">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+            <div>
+              <div className="premium-stat-label">Organic (SEO)</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>65%</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">Paid (Social)</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>25%</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">Direct (Email)</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>10%</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">Target ROAS</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--premium-neon-green)' }}>4.2×</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

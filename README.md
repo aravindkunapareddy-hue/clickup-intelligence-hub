@@ -1,47 +1,51 @@
-# ClickUp Content Revenue Orchestrator
+# GTM Operating System: Revenue Command Center
 
-This is a production-oriented prototype for the take-home assignment.
+The **GTM Operating System** is an elite internal decision engine designed for VP Growth, RevOps, and Content Leads. It transforms multi-source performance signals into high-fidelity tactical revenue orchestration.
 
-What it does:
-- accepts an existing asset or new content idea
-- scores opportunity across traffic, CTA fit, conversion gap, freshness, and AI search readiness
-- recommends one next best action
-- drafts experiments and pod routing
-- outputs ClickUp handoff tasks
-- defines the analytics and attribution layer needed to connect content to revenue
+## The Signal → Score → Act Workflow
 
-## Files
+The platform is organized into three foundational layers of operational intelligence:
 
-- `index.html` - frontend app
-- `api/content-revenue-orchestrator.js` - backend endpoint for Vercel-style deployments
+### 1. Signal Phase (Monitoring & Detection)
+- **Executive Overview (Diagnostic Hub)**: Flagship command center featuring a **9-KPI Strategic Strip**, **Biggest Wins vs. Leaks** analysis, and **AI-generated Weekly Strategic Summaries**.
+- **SEO & YouTube Hubs**: Deep-dive performance hubs with 50+ variables per asset.
+- **CTA Intelligence**: Head-to-head conversion audit across offers and placements.
+- **GTM Comparisons**: Advanced Persona vs. CTA heatmaps and intent velocity radars.
 
-## Why this version is safer
+### 2. Score Phase (Prioritization & Fit)
+- **Persona & Account Signals**: Real-time intent monitoring at the entity level.
+- **Lead Scorer**: A high-density, searchable **Intent & Fit Intelligence Matrix** with real-time CRM and 6Sense data integration.
 
-The frontend no longer calls Anthropic directly from the browser.
-It posts to `/api/content-revenue-orchestrator`, so the API key stays in server-side environment variables.
+### 3. Act Phase (The Operational Surface)
+- **Opportunity Queue (Workstation)**: The central operating surface of the app. A dynamic **9-Column Work Queue** with:
+  - **7 Revenue-Segment Quick Filters** (High Traffic, Strong Eng, Stale Content, etc.).
+  - **Growth Operator Side Panel**: Context-aware tactical generation (Why flagged, Metrics, Next Action, Generated Brief, KPI).
+- **Senior Growth Operator Studio**: A context-aware intelligence engine that generates structured **7-Field Decision Briefs**.
 
-If `ANTHROPIC_API_KEY` is missing, the backend returns a deterministic demo response so the app still works for screenshots and a live walkthrough.
+---
 
-## Deploy on Vercel
+## Operational Excellence (Production-Ready)
+- **5-Step Diagnostic Narrative**: Executive Overview leads with a flow built for leadership walkthroughs (KPI Strip → Wins → Leaks → AI Summary → Ranking NBA).
+- **Persistent Header & Metadata**: Integrated breadcrumb navigation, "Last Sync" timestamps, and live source indicators (GSC, CRM, YT).
+- **High-Trust Strategy framing**: Standardized **"What / Why / Next"** framing across all components for weekly strategic alignment.
 
-1. Create a new project and upload this folder.
-2. Add environment variable:
-   - `ANTHROPIC_API_KEY`
-3. Optional:
-   - `ANTHROPIC_MODEL=claude-sonnet-4-6`
-4. Deploy.
+## Tech Stack & Design
+- **Frontend**: Vite + React
+- **Design System**: **Premium Pro-Light** (Executive White, Strict Semantic Coloring, Spreadsheet-like Density)
+- **API**: Google Gemini 1.5 Flash (Studio generation)
+- **Deployment**: Optimized for Vercel
 
-## Local quick test
+## Local Development
 
-Because the frontend is static and the backend is a serverless function, the simplest local test is to run it in a platform that supports the `api/` route pattern.
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-If you only need a walkthrough or screenshots, open `index.html` and use the built-in sample asset. The app will still render a deterministic strategy even without the backend.
+2. **Start the dev server**:
+   ```bash
+   npm run dev
+   ```
 
-## Suggested demo flow for the assignment
-
-1. Load the sample asset.
-2. Generate the strategy.
-3. Show the opportunity score and explain why the system prioritized conversion over new content volume.
-4. Show the next best action and CTA recommendation.
-5. Show the experiment plan.
-6. Finish on revenue tracking to tie the work back to pipeline.
+---
+Built for Premium ClickUp Revenue Operations.

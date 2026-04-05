@@ -1,66 +1,98 @@
-import { Card, CardHeader, CardBody } from '../ui/Card.jsx'
-import TaskItem from '../ui/TaskItem.jsx'
-import InsightBar from '../ui/InsightBar.jsx'
-import { TagPillGray } from '../ui/TagPill.jsx'
-import EmptyState from '../ui/EmptyState.jsx'
-import LoadingState from '../ui/LoadingState.jsx'
+import React from 'react'
 
-export default function TabExecution({ data, loading, onNext }) {
-  if (loading) return <LoadingState />
-  if (!data) return <EmptyState icon="✅" title="Execution plan will appear here" desc="Generate a brief to see tasks, dependencies, and risks." />
+export default function TabExecution({ data, loading }) {
+  if (loading) return (
+    <div className="premium-card" style={{ height: '400px', display: 'grid', placeItems: 'center' }}>
+      <div className="premium-neon-badge" style={{ color: 'var(--premium-neon-green)' }}>Syncing CMS Execution Hub...</div>
+    </div>
+  )
 
-  const e = data.execution
+  const assets = [
+    { type: 'Blog Post', title: 'The 2024 Migration Checklist', status: 'READY', owner: 'SEO Pod' },
+    { type: 'Comparison', title: 'ClickUp vs Asana: Migration ROI', status: 'IN_DESIGN', owner: 'Brand Pod' },
+    { type: 'YouTube', title: 'How to move 1000+ tasks in 5 mins', status: 'SCRIPTING', owner: 'Video Pod' },
+    { type: 'Email', title: 'Nurture: From Vendor Fear to Setup Speed', status: 'READY', owner: 'Lifecycle' },
+  ]
+
   return (
-    <div>
-      <InsightBar>
-        Timeline: <strong>{e.total_timeline_days} days</strong> · <strong>{(e.tasks || []).length} tasks</strong> · Copy task titles directly into ClickUp
-      </InsightBar>
-
-      <div className="grid-2">
-        {/* Task Breakdown */}
-        <Card>
-          <CardHeader icon="📋" iconBg="#EFF6FF" title="Task Breakdown" />
-          <CardBody>
-            <div className="task-list">
-              {(e.tasks || []).map((task, i) => (
-                <TaskItem key={i} task={task} number={i + 1} />
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        <div>
-          {/* Key Dependencies */}
-          <Card>
-            <CardHeader icon="🔗" iconBg="var(--purple-faint-bg)" title="Key Dependencies" />
-            <CardBody>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {(e.key_dependencies || []).map((dep, i) => (
-                  <TagPillGray key={i}>{dep}</TagPillGray>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Risks & Blockers */}
-          <Card>
-            <CardHeader icon="⚠️" iconBg="#FEF2F2" title="Risks & Blockers" />
-            <CardBody>
-              {(e.risks || []).map((r, i) => (
-                <div key={i} className="risk-item">
-                  <span className="risk-icon">⚠️</span>
-                  <span>{r}</span>
+    <div className="tab-pane-container">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px', marginBottom: '20px' }}>
+        
+        {/* Execution Matrix Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>⚙️</span>
+            <span className="card-title">Asset Deployment Matrix</span>
+          </div>
+          <div className="premium-card-body">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {assets.map((asset, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', background: 'var(--premium-dark-surface)', borderRadius: '12px', border: '1px solid var(--premium-dark-border)' }}>
+                  <div style={{ width: '80px', fontSize: '10px', color: 'var(--premium-dark-text-muted)' }}>{asset.type}</div>
+                  <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>{asset.title}</div>
+                  <div className="premium-neon-badge" style={{ 
+                    fontSize: '9px', 
+                    color: asset.status === 'READY' ? 'var(--premium-neon-green)' : asset.status === 'IN_DESIGN' ? 'var(--premium-neon-blue)' : '#a1a1aa' ,
+                    background: 'rgba(0, 0, 0, 0.2)'
+                  }}>
+                    {asset.status.replace('_', ' ')}
+                  </div>
                 </div>
               ))}
-            </CardBody>
-          </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* CMS Sync Status Card */}
+        <div className="premium-card">
+          <div className="premium-card-header">
+            <span style={{ fontSize: '18px' }}>🔄</span>
+            <span className="card-title">CMS Sync & API Status</span>
+          </div>
+          <div className="premium-card-body">
+            <div className="premium-stat-label">System Health</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--premium-neon-green)', marginBottom: '24px' }}>OPERATIONAL (99.9%)</div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <div className="premium-stat-label">Wordpress Sync</div>
+                <div style={{ fontSize: '13px', color: '#fff' }}>Online 🚀</div>
+              </div>
+              <div>
+                <div className="premium-stat-label">YouTube API</div>
+                <div style={{ fontSize: '13px', color: '#fff' }}>Connected 🏁</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, paddingBottom: 24 }}>
-        <button onClick={onNext} style={{ background: '#7B68EE', color: 'white', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 500, fontSize: 13, boxShadow: '0 2px 4px rgba(123, 104, 238, 0.2)' }}>
-          Next Step: SEO Metadata &rarr;
-        </button>
+      {/* Production Load */}
+      <div className="premium-card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(0, 210, 255, 0.05))' }}>
+        <div className="premium-card-header">
+          <span style={{ fontSize: '18px' }}>🧵</span>
+          <span className="card-title">Production Thread Velocity</span>
+        </div>
+        <div className="premium-card-body">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+            <div>
+              <div className="premium-stat-label">Total Load</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>18.2%</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">Active Gaps</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--premium-neon-red)' }}>3</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">CMS Drafts</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>12</div>
+            </div>
+            <div>
+              <div className="premium-stat-label">Scheduled</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--premium-neon-blue)' }}>8</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

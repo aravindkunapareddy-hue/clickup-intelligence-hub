@@ -1,72 +1,66 @@
-const SPACES = [
-  { label: 'Campaigns (Coming soon)', color: '#7B68EE', disabled: true },
-  { label: 'Blogs (Coming soon)', color: '#36B8F5', disabled: true },
-  { label: 'Brand Assets (Coming soon)', color: '#59C6A5', disabled: true },
-  { label: 'Design Workflows (Coming soon)', color: '#F59E0B', disabled: true },
-  { label: 'Launch Plans (Coming soon)', color: '#EF4444', disabled: true },
-]
+import React from 'react'
+import Icon from '../ui/Icon.jsx'
+import { NAV_ITEMS } from '../../data/intelligence.js'
 
-const WORKSPACE_ITEMS = [
-  { icon: '⚡', label: 'Content Intelligence', active: true },
-  { icon: '📊', label: 'Analytics Hub (Coming soon)', disabled: true },
-  { icon: '📋', label: 'Campaign Tracker (Coming soon)', disabled: true },
-  { icon: '🤖', label: 'AI Workflows (Coming soon)', disabled: true },
-]
+const ICONS = {
+  onboarding: 'cpu',
+  overview: 'chart',
+  scorer: 'target',
+  intelligence: 'search',
+  execution: 'check_square',
+}
 
-const POD_ITEMS = [
-  { icon: '✍️', label: 'SEO / Blog Pod (Coming soon)', disabled: true },
-  { icon: '🎥', label: 'YouTube Pod (Coming soon)', disabled: true },
-  { icon: '⭐', label: 'Customer Marketing (Coming soon)', disabled: true },
-  { icon: '📣', label: 'Demand Pod (Coming soon)', disabled: true },
-]
-
-export default function Sidebar({ savedBriefs = [], activeBriefId, onLoadBrief }) {
+export default function Sidebar({ activeView, onboardingComplete, onNavigate, onboarding }) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-section-label">Marketing Workspace</div>
-      {WORKSPACE_ITEMS.map(item => (
-        <div key={item.label} className={`sidebar-item${item.active ? ' active' : ''}`} style={item.disabled ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
-          <span className="sidebar-item-icon">{item.icon}</span>
-          <span className="sidebar-item-label">{item.label}</span>
+      <div className="sidebar-block">
+        <div className="sidebar-label">Flows</div>
+        <div className="nav-stack">
+          {NAV_ITEMS.map((item, index) => (
+            <button
+              key={item.id}
+              className={`nav-card${activeView === item.id ? ' is-active' : ''}${!onboardingComplete && item.id !== 'onboarding' ? ' is-locked' : ''}`}
+              onClick={() => {
+                if (onboardingComplete || item.id === 'onboarding') onNavigate(item.id)
+              }}
+              type="button"
+            >
+              <div className="nav-card-index">0{index + 1}</div>
+              <div className="nav-card-icon">
+                <Icon name={ICONS[item.id]} size={16} />
+              </div>
+              <div className="nav-card-copy">
+                <div className="nav-card-title">{item.label}</div>
+                <div className="nav-card-description">{item.description}</div>
+              </div>
+            </button>
+          ))}
         </div>
-      ))}
+      </div>
 
-      <div className="sidebar-divider" />
-
-      <div className="sidebar-section-label">Workspace Briefs ({savedBriefs.length})</div>
-      {savedBriefs.length === 0 && <div style={{ fontSize: 12, color: '#9CA3AF', padding: '0 12px', marginBottom: 12 }}>No saved briefs yet.</div>}
-      {savedBriefs.map(b => (
-        <div 
-          key={b.id} 
-          className={`sidebar-item${activeBriefId === b.id ? ' active' : ''}`}
-          onClick={() => onLoadBrief(b.id)}
-          title={b.name}
-        >
-          <span className="sidebar-item-icon">📄</span>
-          <span className="sidebar-item-label" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.name}</span>
+      <div className="sidebar-block">
+        <div className="sidebar-label">Operating context</div>
+        <div className="context-card">
+          <div className="context-title">Current operator</div>
+          <div className="context-value">{onboarding.userRole}</div>
+          <div className="context-title">Content pod focus</div>
+          <div className="context-value">{onboarding.priorityPod}</div>
+          <div className="context-title">Outcome</div>
+          <div className="context-value">{onboarding.outcome}</div>
+          <div className="context-title">Connected sources</div>
+          <div className="tag-list">
+            {onboarding.sources.map((item) => (
+              <span key={item} className="tag-chip">
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
-      ))}
+      </div>
 
-      <div className="sidebar-divider" />
-
-      <div className="sidebar-section-label">Content Pods</div>
-      {POD_ITEMS.map(item => (
-        <div key={item.label} className="sidebar-item" style={item.disabled ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
-          <span className="sidebar-item-icon">{item.icon}</span>
-          <span className="sidebar-item-label">{item.label}</span>
-          {item.count && <span className="sidebar-count">{item.count}</span>}
-        </div>
-      ))}
-
-      <div className="sidebar-divider" />
-
-      <div className="sidebar-section-label">Spaces</div>
-      {SPACES.map(s => (
-        <div key={s.label} className="sidebar-item" style={s.disabled ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
-          <span className="sidebar-space-dot" style={{ background: s.color }} />
-          <span className="sidebar-item-label">{s.label}</span>
-        </div>
-      ))}
+      <div className="sidebar-footnote">
+        Built for the ClickUp content team to see performance, gaps, and next bets in one system.
+      </div>
     </aside>
   )
 }

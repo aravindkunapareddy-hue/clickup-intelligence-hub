@@ -1,27 +1,45 @@
-import Badge from './Badge.jsx'
+import React from 'react'
 
-export default function TaskItem({ task, useNumber, number }) {
-  const priorityClass = task.priority === 'P0' ? 'dot-p0' : task.priority === 'P1' ? 'dot-p1' : 'dot-p2'
-  const badgeVariant = task.priority === 'P0' ? 'red' : task.priority === 'P1' ? 'amber' : 'gray'
+const PRIORITY_COLORS = {
+  high: '#F43F5E',
+  medium: '#F59E0B',
+  low: '#10B981'
+}
 
+export default function TaskItem({ priority, content, meta }) {
+  const normalizedPriority = (priority || '').toLowerCase()
+  const color = PRIORITY_COLORS[normalizedPriority] || '#64748B'
+  
   return (
-    <div className="task-item">
-      <div className={`task-priority-dot ${priorityClass}`} />
-      {useNumber
-        ? <div className="task-num">{number}</div>
-        : <div className="task-check">{number}</div>
-      }
-      <div className="task-content">
-        <div className="task-name">{task.title}</div>
-        <div className="task-meta">
-          <span className="task-meta-text">{task.owner}</span>
-          {task.day_start != null && (
-            <span className="task-meta-text">Day {task.day_start}</span>
-          )}
-          {task.duration_hrs != null && (
-            <span className="task-meta-text">{task.duration_hrs}h</span>
-          )}
-          <Badge variant={badgeVariant}>{task.priority}</Badge>
+    <div className="task-item" style={{ 
+      display: 'flex', 
+      gap: 16, 
+      padding: '14px 0', 
+      borderBottom: '1px solid var(--border)',
+      alignItems: 'flex-start'
+    }}>
+      <div style={{ 
+        width: 12, 
+        height: 12, 
+        borderRadius: 4, 
+        background: color, 
+        marginTop: 4, 
+        boxShadow: `0 0 10px ${color}40`,
+        flexShrink: 0
+      }} />
+      <div style={{ flex: 1 }}>
+        <p className="task-name" style={{ 
+          fontSize: 14, 
+          fontWeight: 700, 
+          color: 'var(--text-primary)', 
+          marginBottom: 4,
+          lineHeight: 1.4 
+        }}>
+          {content}
+        </p>
+        <div className="task-meta" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{priority}</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{meta}</span>
         </div>
       </div>
     </div>
